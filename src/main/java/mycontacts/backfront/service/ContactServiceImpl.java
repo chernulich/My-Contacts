@@ -31,6 +31,7 @@ public class ContactServiceImpl implements ContactService {
     @Override
     public void createContact(ContactDto contactDto) {
         User user1 = User.builder()
+                .id(0L)
                 .fullName(contactDto.getFullName())
                 .email(contactDto.getEmail())
                 .createdDate(LocalDateTime.now())
