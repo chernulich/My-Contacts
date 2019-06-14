@@ -98,13 +98,16 @@ public class ContactServiceImpl implements ContactService {
     public ContactDto getContactByPhoneNumber(String phoneNumber) {
         List<PhoneNumber> phoneNumbers = phoneNumberRepository.findAll();
         PhoneNumber activeNumber = phoneNumbers.stream().filter(phoneNumber::equals).findFirst().get();
-        ContactDto contactDto =
-        return null;
+        User user = activeNumber.getUser();
+        ContactDto contactDto = uniteContactDto(user, addressRepository.findAllByUser(user));
+        return contactDto;
     }
 
     @Override
     public ContactDto getContactByName(String name) {
-        return null;
+        User user = userRepository.findUserByFullName(name);
+        ContactDto contactDto = uniteContactDto(user, addressRepository.findAllByUser(user));
+        return contactDto;
     }
 
     @Override
