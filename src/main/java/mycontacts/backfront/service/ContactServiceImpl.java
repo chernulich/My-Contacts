@@ -96,6 +96,9 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public ContactDto getContactByPhoneNumber(String phoneNumber) {
+        List<PhoneNumber> phoneNumbers = phoneNumberRepository.findAll();
+        PhoneNumber activeNumber = phoneNumbers.stream().filter(phoneNumber::equals).findFirst().get();
+        ContactDto contactDto =
         return null;
     }
 
