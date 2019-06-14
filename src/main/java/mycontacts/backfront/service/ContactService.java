@@ -13,6 +13,6 @@ public interface ContactService {
     List<ContactDto> getAllContacts();
     ContactDto getContactByPhoneNumber(String phoneNumber);
     ContactDto getContactByName(String name);
-    List<String> getAllNames();
+    List<User> getAllNames();
 
 }

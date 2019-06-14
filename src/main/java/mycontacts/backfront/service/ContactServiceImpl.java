@@ -31,7 +31,7 @@ public class ContactServiceImpl implements ContactService {
     @Override
     public void createContact(ContactDto contactDto) {
         User user1 = User.builder()
-                .id(0L)
+               // .id(0L)
                 .fullName(contactDto.getFullName())
                 .email(contactDto.getEmail())
                 .createdDate(LocalDateTime.now())
@@ -61,6 +61,9 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public void updateContact(ContactDto contactDto) {
+        User user = userRepository.findUserByFullName(contactDto.getFullName());
+        List<Address> addresses = addressRepository.findAllByUser(user);
+        List<PhoneNumber> phoneNumbers = phoneNumberRepository.findAllByUser(user);
 
     }
 
@@ -111,7 +114,7 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public List<String> getAllNames() {
-        return null;
+    public List<User> getAllNames() {
+        return userRepository.findAll();
     }
 }
