@@ -20,6 +20,11 @@ public class ContactController {
         contactService.createContact(contactDto);
     }
 
+    @PostMapping("/updateContact")
+    public void updateContact(@RequestBody ContactDto contactDto){
+        contactService.updateContact(contactDto);
+    }
+
     @DeleteMapping("/deleteContact")
     public void deleteContact(@PathVariable(name = "id") Long id){
         contactService.deleteContact(id);

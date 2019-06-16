@@ -70,9 +70,11 @@ public class ContactServiceImpl implements ContactService {
         User user = userRepository.findUserByFullName(contactDto.getFullName());
         addressRepository.deleteAllByUser(user);
         phoneNumberRepository.deleteAllByUser(user);
+        Long id = user.getId();
+        userRepository.delete(user);
 
         User newUser = User.builder()
-                .id(user.getId())
+                .id(id)
                 .fullName(contactDto.getFullName())
                 .email(contactDto.getEmail())
                 .createdDate(LocalDateTime.now())
@@ -117,9 +119,8 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public ContactDto getContactByPhoneNumber(String phoneNumber) {
-        List<PhoneNumber> phoneNumbers = phoneNumberRepository.findAll();
-        PhoneNumber activeNumber = phoneNumbers.stream().filter(phoneNumber::equals).findFirst()
-                .orElseThrow(() -> new PhoneNumberNotFoundException("PhoneNumber doesn't exist."));
+        //List<PhoneNumber> phoneNumbers = phoneNumberRepository.findAll();
+        PhoneNumber activeNumber = phoneNumberRepository.findByPhoneNumber(phoneNumber);
         User user = activeNumber.getUser();
         ContactDto contactDto = uniteContactDto(user, addressRepository.findAllByUser(user));
         return contactDto;

@@ -10,5 +10,7 @@ public interface PhoneNumberRepository extends JpaRepository<PhoneNumber, Long> 
 
     List<PhoneNumber> findAllByUser(User user);
 
+    PhoneNumber findByPhoneNumber(String phoneNumber);
+
     void deleteAllByUser(User user);
 }
