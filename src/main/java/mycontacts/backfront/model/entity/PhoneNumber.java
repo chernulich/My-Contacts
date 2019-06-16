@@ -27,6 +27,7 @@ public class PhoneNumber {
     private LocalDateTime createdDate;
 
     @NotBlank
+    @Column(unique = true)
     private String phoneNumber;
 
 }

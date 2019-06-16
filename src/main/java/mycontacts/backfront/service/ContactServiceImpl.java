@@ -5,6 +5,8 @@ import mycontacts.backfront.model.dto.ContactDto;
 import mycontacts.backfront.model.entity.Address;
 import mycontacts.backfront.model.entity.PhoneNumber;
 import mycontacts.backfront.model.entity.User;
+import mycontacts.backfront.myException.PhoneNumberNotFoundException;
+import mycontacts.backfront.myException.UserNotFoundException;
 import mycontacts.backfront.repository.AddressRepository;
 import mycontacts.backfront.repository.PhoneNumberRepository;
 import mycontacts.backfront.repository.UserRepository;
@@ -31,19 +33,23 @@ public class ContactServiceImpl implements ContactService {
     @Override
     public void createContact(ContactDto contactDto) {
         User user1 = User.builder()
-               // .id(0L)
                 .fullName(contactDto.getFullName())
                 .email(contactDto.getEmail())
                 .createdDate(LocalDateTime.now())
                 .build();
-        List<Address> addresses = contactDto.getAddresses().stream().map(address -> AddressDtoToAddress(address, user1))
-                .collect(Collectors.toList());
-        List<PhoneNumber> phoneNumbers = contactDto.getPhoneNumbers().stream().map(phoneNumber -> new PhoneNumber(0L, user1, LocalDateTime.now(), phoneNumber))
-                .collect(Collectors.toList());
         userRepository.save(user1);
+        createDataByUser(user1, contactDto);
+
+    }
+
+    private void createDataByUser(User user, ContactDto contactDto){
+        List<Address> addresses = contactDto.getAddresses().stream().map(address -> AddressDtoToAddress(address, user))
+                .collect(Collectors.toList());
+        List<PhoneNumber> phoneNumbers = contactDto.getPhoneNumbers().stream()
+                .map(phoneNumber -> new PhoneNumber(0L, user, LocalDateTime.now(), phoneNumber))
+                .collect(Collectors.toList());
         phoneNumberRepository.saveAll(phoneNumbers);
         addressRepository.saveAll(addresses);
-
     }
 
     private Address AddressDtoToAddress(AddressDto addressDto, User user){
@@ -53,7 +59,7 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public void deleteContact(Long id) {
-        User user = userRepository.findById(id).get();
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User doesn't exist."));
         addressRepository.deleteAllByUser(user);
         phoneNumberRepository.deleteAllByUser(user);
         userRepository.delete(user);
@@ -62,10 +68,22 @@ public class ContactServiceImpl implements ContactService {
     @Override
     public void updateContact(ContactDto contactDto) {
         User user = userRepository.findUserByFullName(contactDto.getFullName());
-        List<Address> addresses = addressRepository.findAllByUser(user);
-        List<PhoneNumber> phoneNumbers = phoneNumberRepository.findAllByUser(user);
+        addressRepository.deleteAllByUser(user);
+        phoneNumberRepository.deleteAllByUser(user);
+
+        User newUser = User.builder()
+                .id(user.getId())
+                .fullName(contactDto.getFullName())
+                .email(contactDto.getEmail())
+                .createdDate(LocalDateTime.now())
+                .build();
+
+        userRepository.save(newUser);
+        createDataByUser(newUser, contactDto);
+
 
     }
+
 
     @Override
     public List<ContactDto> getAllContacts() {
@@ -100,7 +118,8 @@ public class ContactServiceImpl implements ContactService {
     @Override
     public ContactDto getContactByPhoneNumber(String phoneNumber) {
         List<PhoneNumber> phoneNumbers = phoneNumberRepository.findAll();
-        PhoneNumber activeNumber = phoneNumbers.stream().filter(phoneNumber::equals).findFirst().get();
+        PhoneNumber activeNumber = phoneNumbers.stream().filter(phoneNumber::equals).findFirst()
+                .orElseThrow(() -> new PhoneNumberNotFoundException("PhoneNumber doesn't exist."));
         User user = activeNumber.getUser();
         ContactDto contactDto = uniteContactDto(user, addressRepository.findAllByUser(user));
         return contactDto;

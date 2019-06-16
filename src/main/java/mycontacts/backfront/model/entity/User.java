@@ -28,5 +28,6 @@ public class User {
     private String fullName;
 
     @Email
+    @Column(unique = true)
     private String email;
 }
